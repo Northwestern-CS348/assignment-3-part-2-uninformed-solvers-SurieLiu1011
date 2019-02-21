@@ -30,21 +30,17 @@ class SolverDFS(UninformedSolver):
             return True
         # get children:
         movables = self.gm.getMovables()
-        #print("currentState: " + str(self.currentState.state))
-        #print("movable:")
-        #if movables:
-        #    for move in movables:
-        #        print(str(move))
-        #print("indexOfchildren:")
-        #print(current_gamestate.nextChildToVisit)
 
-        #print("movables: ", movables)
         # if no children or children all visited, go back:
-        if len(movables) == 0 or current_gamestate.nextChildToVisit >= len(movables):
-            print("no valid children")
+        if len(movables) == 0:
+            print("no children")
             current_gamestate = current_gamestate.parent
             if current_gamestate.requiredMovable is not None:
-                print("no valid children and reverse")
+                self.gm.reverseMove(current_gamestate.requiredMovable)
+        elif current_gamestate.nextChildToVisit >= len(movables):
+            current_gamestate = current_gamestate.parent
+            print("all children have been visited")
+            if current_gamestate.requiredMovable is not None:
                 self.gm.reverseMove(current_gamestate.requiredMovable)
         # expand if have unvisited children:
         else:
@@ -58,7 +54,7 @@ class SolverDFS(UninformedSolver):
                 self.gm.reverseMove(move)
                 print("this child is the same as parent or visited")
                 if current_gamestate.nextChildToVisit >= len(movables):
-                    #self.currentState = current_gamestate.parent
+                    # self.currentState = current_gamestate.parent
                     # all children have been visited and go back to parent node:
                     self.gm.reverseMove(current_gamestate.requiredMovable)
                     return False
@@ -68,8 +64,8 @@ class SolverDFS(UninformedSolver):
                     current_gamestate.nextChildToVisit += 1
 
             new_state = self.gm.getGameState()
-            #print("new state:", new_state)
-            #print("movable:", self.gm.getMovables())
+            # print("new state:", new_state)
+            # print("movable:", self.gm.getMovables())
 
             new_gamestate = GameState(new_state, current_gamestate.depth + 1, move)
             current_gamestate.children.append(new_gamestate)
@@ -77,6 +73,8 @@ class SolverDFS(UninformedSolver):
             self.currentState = new_gamestate
 
         return False
+
+
 
 
 
@@ -114,6 +112,7 @@ class SolverBFS(UninformedSolver):
             require_move = node[1]
             self.visited[curr_state] = True
             self.to_origin()
+
             #("curr_state:", curr_state.state)
             # to record in visit_list:
             for item in require_move:
