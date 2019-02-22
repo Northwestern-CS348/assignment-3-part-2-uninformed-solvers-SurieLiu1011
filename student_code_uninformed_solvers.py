@@ -22,38 +22,31 @@ class SolverDFS(UninformedSolver):
         ### Student code goes here
         Current_Gamestate = self.currentState
         self.visited[Current_Gamestate] = True
+        print("Current state:", str(Current_Gamestate.state))
         if Current_Gamestate.state == self.victoryCondition:
             return True
         movables = self.gm.getMovables()
         if len(movables) == 0:
+            print("No children!")
             if Current_Gamestate.requiredMovable != None:
                 self.gm.reverseMove(Current_Gamestate.requiredMovable)
-
-        elif Current_Gamestate.nextChildToVisit >= len(movables):
-            if Current_Gamestate.requiredMovable != None:
-                self.gm.reverseMove(Current_Gamestate.requiredMovable)
-
         else:
-
             moveTonext = movables[Current_Gamestate.nextChildToVisit]
-            Current_Gamestate.nextChildToVisit += 1
             self.gm.makeMove(moveTonext)
             while GameState(self.gm.getGameState(), 0, None) in self.visited:
                 self.gm.reverseMove(moveTonext)
-
                 if Current_Gamestate.nextChildToVisit >= len(movables):
-
                     self.gm.reverseMove(Current_Gamestate.requiredMovable)
                     return False
                 else:
                     moveTonext = movables[Current_Gamestate.nextChildToVisit]
                     Current_Gamestate.nextChildToVisit += 1
                     self.gm.makeMove(moveTonext)
-
-            new_gamestate = GameState(self.gm.getGameState(), Current_Gamestate.depth+1, moveTonext)
+            Current_Gamestate.nextChildToVisit += 1
+            new_gamestate = GameState(self.gm.getGameState(), Current_Gamestate.depth + 1, moveTonext)
             Current_Gamestate.children = new_gamestate
             new_gamestate.parent = Current_Gamestate
-            #self.visited[new_gamestate] = True
+            self.visited[new_gamestate] = False
             self.currentState = new_gamestate
         return False
 
@@ -121,8 +114,10 @@ class SolverDFS(UninformedSolver):
 class SolverBFS(UninformedSolver):
     def __init__(self, gameMaster, victoryCondition):
         super().__init__(gameMaster, victoryCondition)
-        self.queue = Queue()
-        self.queue.put([self.currentState, []])
+        self.queue1 = Queue()
+        self.queue2 = Queue()
+        self.queue1.put(self.currentState)
+        self.queue2.put([])
         self.solveOneStep()
 
     def to_origin(self):
@@ -146,35 +141,42 @@ class SolverBFS(UninformedSolver):
         """
 
         ### Student code goes here
-        if self.queue:
-            node = self.queue.get()
-            curr_state = node[0]
-            require_move = node[1]
+        if self.queue1 and self.queue2:
+            curr_state = self.queue1.get()
+            require_move = self.queue2.get()
             self.visited[curr_state] = True
             self.to_origin()
-
+            print("Current state:", str(curr_state.state))
             #("curr_state:", curr_state.state)
-            # to record in visit_list:
+            # update game master:
             for item in require_move:
                 self.gm.makeMove(item)
+            print("Current game master:", str(self.gm.getGameState()))
             if curr_state.state == self.victoryCondition:
                 return True
             movebales = self.gm.getMovables()
-            if len(movebales) != 0:
+            if len(movebales) == 0:
+                print("No children!")
+                return False
+            else:
                 for move in movebales:
                     self.gm.makeMove(move)
-                    if self.visited.__contains__(GameState(self.gm.getGameState(), 0, None)):
+                    new_state = GameState(self.gm.getGameState(), curr_state.depth+1, move)
+                    if self.visited.__contains__(new_state):
+                        print("Children", str(new_state.state), "has been visited")
                         self.gm.reverseMove(move)
                     else:
-                        new_state = GameState(self.gm.getGameState(), curr_state.depth+1, move)
-                        new_require = [re for re in require_move]
+                        new_require = []
+                        for re in require_move:
+                            new_require.append(re)
                         #print("old_require:" , new_require)
                         new_require.append(move)
                         #print("new_require: ", new_require)
                         curr_state.children.append(new_state)
                         new_state.parent = curr_state
-                        self.visited[new_state] = True
-                        self.queue.put([new_state, new_require])
+                        self.visited[new_state] = False
+                        self.queue1.put(new_state)
+                        self.queue2.put(new_require)
                         self.gm.reverseMove(move)
                 #print("curr state", self.currentState.state)
                 self.currentState = curr_state
