@@ -38,7 +38,7 @@ class SolverDFS(UninformedSolver):
             moveTonext = movables[Current_Gamestate.nextChildToVisit]
             Current_Gamestate.nextChildToVisit += 1
             self.gm.makeMove(moveTonext)
-            while ((Current_Gamestate.parent is not None) and (Current_Gamestate.parent.state == self.gm.getGameState())) or (GameState(self.gm.getGameState(), 0, None) in self.visited):
+            while GameState(self.gm.getGameState(), 0, None) in self.visited:
                 self.gm.reverseMove(moveTonext)
 
                 if Current_Gamestate.nextChildToVisit >= len(movables):
@@ -163,7 +163,7 @@ class SolverBFS(UninformedSolver):
             if len(movebales) != 0:
                 for move in movebales:
                     self.gm.makeMove(move)
-                    if ((curr_state.parent is not None) and (curr_state.parent.state == self.gm.getGameState())) or (self.visited.__contains__(GameState(self.gm.getGameState(), 0, None))):
+                    if self.visited.__contains__(GameState(self.gm.getGameState(), 0, None)):
                         self.gm.reverseMove(move)
                         continue
                     new_state = GameState(self.gm.getGameState(), curr_state.depth+1, move)
