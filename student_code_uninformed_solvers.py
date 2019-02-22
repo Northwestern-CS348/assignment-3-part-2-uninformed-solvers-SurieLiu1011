@@ -165,17 +165,17 @@ class SolverBFS(UninformedSolver):
                     self.gm.makeMove(move)
                     if self.visited.__contains__(GameState(self.gm.getGameState(), 0, None)):
                         self.gm.reverseMove(move)
-                        continue
-                    new_state = GameState(self.gm.getGameState(), curr_state.depth+1, move)
-                    new_require = [re for re in require_move]
-                    #print("old_require:" , new_require)
-                    new_require.append(move)
-                    #print("new_require: ", new_require)
-                    curr_state.children.append(new_state)
-                    new_state.parent = curr_state
-                    self.visited[new_state] = True
-                    self.queue.put([new_state, new_require])
-                    self.gm.reverseMove(move)
+                    else:
+                        new_state = GameState(self.gm.getGameState(), curr_state.depth+1, move)
+                        new_require = [re for re in require_move]
+                        #print("old_require:" , new_require)
+                        new_require.append(move)
+                        #print("new_require: ", new_require)
+                        curr_state.children.append(new_state)
+                        new_state.parent = curr_state
+                        self.visited[new_state] = True
+                        self.queue.put([new_state, new_require])
+                        self.gm.reverseMove(move)
                 #print("curr state", self.currentState.state)
                 self.currentState = curr_state
                 #print("new curr state", self.currentState.state)
