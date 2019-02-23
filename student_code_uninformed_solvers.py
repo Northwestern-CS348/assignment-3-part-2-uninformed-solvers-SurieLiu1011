@@ -30,23 +30,24 @@ class SolverDFS(UninformedSolver):
         if len(movables) != 0:
             moveTonext = movables[Current_Gamestate.nextChildToVisit]
             self.gm.makeMove(moveTonext)
-            while self.visited.__contains__(GameState(self.gm.getGameState(), 0, None)):
-                self.gm.reverseMove(moveTonext)
-
-                if Current_Gamestate.nextChildToVisit < len(movables):
-                    moveTonext = movables[Current_Gamestate.nextChildToVisit]
+            if GameState(self.gm.getGameState(), 0, None) not in self.visited:
+                Current_Gamestate.nextChildToVisit += 1
+            else:
+                while self.visited.__contains__(GameState(self.gm.getGameState(), 0, None)):
+                    self.gm.reverseMove(moveTonext)
                     Current_Gamestate.nextChildToVisit += 1
-                    self.gm.makeMove(moveTonext)
-                else:
-                    self.gm.reverseMove(Current_Gamestate.requiredMovable)
-                    return False
-
-            Current_Gamestate.nextChildToVisit += 1
+                    if Current_Gamestate.nextChildToVisit < len(movables):
+                        moveTonext = movables[Current_Gamestate.nextChildToVisit]
+                        self.gm.makeMove(moveTonext)
+                    else:
+                        self.gm.reverseMove(Current_Gamestate.requiredMovable)
+                        return False
             new_gamestate = GameState(self.gm.getGameState(), Current_Gamestate.depth + 1, moveTonext)
             Current_Gamestate.children.append(new_gamestate)
             new_gamestate.parent = Current_Gamestate
             self.visited[new_gamestate] = False
             self.currentState = new_gamestate
+
         else:
             print("No children!")
             if Current_Gamestate.requiredMovable != None:
